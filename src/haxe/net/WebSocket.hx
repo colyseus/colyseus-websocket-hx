@@ -23,7 +23,11 @@ class WebSocket {
                     return new haxe.net.impl.WebSocketFlashExternalInterface(url, protocols);
                 }
             #end
-            return haxe.net.impl.WebSocketGeneric.create(url, protocols, origin, debug);
+		#if emscripten
+		return new haxe.net.impl.WebSocketEmscripten(url, protocols, debug);
+		#else
+		return haxe.net.impl.WebSocketGeneric.create(url, protocols, origin, debug);
+		#end
         #end
     }
 
