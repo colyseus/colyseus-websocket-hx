@@ -32,7 +32,7 @@ class WebSocketFlashExternalInterface extends WebSocket {
                 }
                 window.websocketjsList[index] = ws;
                 ws.onopen = function(e) { flashObj.websocketOpen(index); }
-                ws.onclose = function(e) { flashObj.websocketClose(index); }
+                ws.onclose = function(e) { flashObj.websocketClose(index, e.code, e.reason, e.wasClean); }
                 ws.onerror = function(e) { flashObj.websocketError(index); }
                 ws.onmessage = function(e) {
                     if (typeof e.data == 'string') {
@@ -63,10 +63,14 @@ class WebSocketFlashExternalInterface extends WebSocket {
                 sockets[index].onopen();
             });
         });
-        ExternalInterface.addCallback('websocketClose', function(index:Int) {
+        ExternalInterface.addCallback('websocketClose', function(index:Int, code:Int, reason:String, wasClean:Bool) {
             if (debug) trace('js.websocketClose[$index]');
             WebSocket.defer(function() {
-                sockets[index].onclose();
+                sockets[index].onclose({
+                    code: code,
+                    reason: reason,
+                    wasClean: wasClean
+                });
             });
         });
         ExternalInterface.addCallback('websocketError', function(index:Int) {

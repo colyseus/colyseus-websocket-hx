@@ -7,3 +7,4 @@
 /target
 *.zip
 display-*.hxml
+node_modules

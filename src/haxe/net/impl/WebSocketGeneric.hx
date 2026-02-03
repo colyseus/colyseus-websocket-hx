@@ -4,6 +4,7 @@ import haxe.crypto.Base64;
 import haxe.crypto.Sha1;
 import haxe.io.Bytes;
 import haxe.net.Socket2;
+import haxe.net.WebSocket.CloseEvent;
 import haxe.net.WebSocket.ReadyState;
 
 class WebSocketGeneric extends WebSocket {
@@ -57,7 +58,7 @@ class WebSocketGeneric extends WebSocket {
         socketData = new BytesRW();
         socket.onclose = function() {
             _debug('socket closed');
-            setClosed();
+            setClosed(1006, "Connection closed abnormally", false);
         };
         socket.onerror = function() {
             _debug('ioerror: ');
@@ -137,7 +138,7 @@ class WebSocketGeneric extends WebSocket {
                     } catch(e:Dynamic) {
                         _debug('Error during validating server handshake response header: $e');
                         onerror('Error during validating server handshake response header: ${e}');
-                        setClosed();
+                        setClosed(1002, "Protocol error during handshake", false);
                     }
                 case State.ServerHandshake:
                     if (!readHttpHeader()) {
@@ -216,7 +217,17 @@ class WebSocketGeneric extends WebSocket {
                             lastPong = Date.now();
                         case Opcode.Close:
                             _debug("Socket Closed");
-                            setClosed();
+                            var closeCode:Int = 1005;  // NoStatus
+                            var closeReason:String = "";
+                            var messageData = payload.readAllAvailableBytes();
+                            var unmaskedData = isMasked ? applyMask(messageData, mask) : messageData;
+                            if (unmaskedData.length >= 2) {
+                                closeCode = (unmaskedData.get(0) << 8) | unmaskedData.get(1);
+                                if (unmaskedData.length > 2) {
+                                    closeReason = unmaskedData.sub(2, unmaskedData.length - 2).toString();
+                                }
+                            }
+                            setClosed(closeCode, closeReason, true);
                             try {
                                 socket.close();
                             } catch(_:Dynamic) {}
@@ -244,10 +255,14 @@ class WebSocketGeneric extends WebSocket {
         if (statusCode != "101") throw 'Status code differed from 101 indicates that handshake has not succeeded. Actual status code: ${statusCode}.';
     }
 
-    private function setClosed() {
+    private function setClosed(?code:Int, ?reason:String, wasClean:Bool = false) {
         if (state != State.Closed) {
             state = State.Closed;
-            onclose();
+            onclose({
+                code: code != null ? code : 1006,  // 1006 = CloseError (abnormal closure)
+                reason: reason != null ? reason : "",
+                wasClean: wasClean
+            });
         }
     }
 
@@ -355,7 +370,7 @@ class WebSocketGeneric extends WebSocket {
 		if(state != State.Closed) {
 			sendFrame(Bytes.alloc(0), Opcode.Close);
 			socket.close();
-			setClosed();
+			setClosed(1000, "Normal closure", true);
 		}
     }
 

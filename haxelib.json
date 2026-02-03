@@ -1,8 +1,8 @@
 {
   "name" : "colyseus-websocket",
   "description" : "WebSocket client aimed for all platforms",
-  "version" : "1.0.14",
-  "releasenote": "Fix crash when creating an unencrypted WebSocket",
+  "version" : "1.0.15",
+  "releasenote": "onClose: fix exposing e.code and e.reason on native targets.",
   "url" : "https://github.com/colyseus/colyseus-websocket-hx",
   "classPath" : "src",
   "license" : "Public",

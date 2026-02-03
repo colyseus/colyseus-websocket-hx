@@ -1,0 +1,29 @@
+{
+  "name": "colyseus-websocket-hx",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "server for colyseus-websocket-hx testing",
+  "main": "index.js",
+  "scripts": {
+	"start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colyseus/colyseus-websocket-hx.git"
+  },
+  "keywords": [
+    "haxe",
+    "websocket",
+    "server"
+  ],
+  "author": "Endel Dreyer",
+  "license": "MIT",
+  "dependencies": {
+	"ws": "^8.19.0"
+  },
+  "bugs": {
+    "url": "https://github.com/colyseus/colyseus-websocket-hx/issues"
+  },
+  "homepage": "https://github.com/colyseus/colyseus-websocket-hx#readme"
+}

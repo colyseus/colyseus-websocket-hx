@@ -1,0 +1,20 @@
+-swf output/out.swf
+-swf-version 11
+-D swf-header 1280:720:24:FFFFFF
+#-D native_trace
+-cp src
+-main haxe.net.example.WebSocketNodeClientExample
+
+--next
+
+-neko output/out.n
+-cp src
+#-D hxssl=1
+#-lib hxssl:3.0.0-alpha
+-main haxe.net.example.WebSocketNodeClientExample
+
+--next
+
+-js output/out.js
+-cp src
+-main haxe.net.example.WebSocketNodeClientExample

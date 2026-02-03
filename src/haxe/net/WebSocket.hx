@@ -10,6 +10,12 @@ enum ReadyState {
 	Closed;
 }
 
+typedef CloseEvent = {
+	var code:Int;
+	var reason:String;
+	var wasClean:Bool;
+}
+
 class WebSocket {
     private function new() {
     }
@@ -75,6 +81,6 @@ class WebSocket {
     public dynamic function onmessageBytes(message:Bytes):Void {
     }
 
-    public dynamic function onclose(?e:Dynamic):Void {
+    public dynamic function onclose(?e:CloseEvent):Void {
     }
 }

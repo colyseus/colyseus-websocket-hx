@@ -1,3 +1,4 @@
 -cpp output/outCpp
 -cp src
--main haxe.net.example.WebSocketExample
+# -main haxe.net.example.WebSocketExample
+-main haxe.net.example.WebSocketNodeClientExample
