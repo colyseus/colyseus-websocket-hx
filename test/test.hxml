@@ -1,0 +1,6 @@
+# Run from the repo root on a sys target, e.g.:
+#   haxe test/test.hxml -neko bin/test.n && neko bin/test.n
+#   haxe test/test.hxml -cpp bin/cpp && bin/cpp/TestMain
+-cp src
+-cp test
+-main TestMain
