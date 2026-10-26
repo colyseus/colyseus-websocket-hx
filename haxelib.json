@@ -1,12 +1,12 @@
 {
-  "name" : "colyseus-websocket",
-  "description" : "WebSocket client aimed for all platforms",
-  "version" : "1.0.16",
+  "name": "colyseus-websocket",
+  "description": "WebSocket client aimed for all platforms",
+  "version": "1.0.16",
   "releasenote": "sys targets: a second close no longer throws, and a close during the handshake sticks.",
-  "url" : "https://github.com/colyseus/colyseus-websocket-hx",
+  "url": "https://github.com/colyseus/colyseus-websocket-hx",
   "classPath" : "src",
-  "license" : "Public",
-  "tags" : ["websockets","ws","wss","js","cpp","swf","neko","php","python","java","c#","ssl","openssl"],
+  "license": "Public",
+  "tags": ["websockets","ws","wss","js","cpp","swf","neko","php","python","java","c#","ssl","openssl"],
   "contributors": ["endel","soywiz"],
   "github-contributors": ["endel","9Morello","soywiz","romamik","psmtec-dklein","RealyUniqueName","mepsoid"],
   "dependencies": {}
