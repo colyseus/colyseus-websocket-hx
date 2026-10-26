@@ -1,8 +1,8 @@
 {
   "name" : "colyseus-websocket",
   "description" : "WebSocket client aimed for all platforms",
-  "version" : "1.0.15",
-  "releasenote": "onClose: fix exposing e.code and e.reason on native targets.",
+  "version" : "1.0.16",
+  "releasenote": "sys targets: a second close no longer throws, and a close during the handshake sticks.",
   "url" : "https://github.com/colyseus/colyseus-websocket-hx",
   "classPath" : "src",
   "license" : "Public",
