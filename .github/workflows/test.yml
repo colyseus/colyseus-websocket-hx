@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Test (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [neko, cpp]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.6
+
+      - name: Run tests (neko)
+        if: matrix.target == 'neko'
+        run: haxe test/test.hxml -neko bin/test.n && neko bin/test.n
+
+      - name: Run tests (cpp)
+        if: matrix.target == 'cpp'
+        run: |
+          haxelib install hxcpp --quiet
+          haxe test/test.hxml -cpp bin/cpp && bin/cpp/TestMain
+
+  compile:
+    name: Compile (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [js, hl]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.6
+
+      # the tests drive the sys socket; js and hl only need to keep compiling
+      - name: Compile the example
+        run: |
+          if [ "${{ matrix.target }}" = "hl" ]; then haxelib install hashlink --quiet; fi
+          haxe -cp src -main haxe.net.example.WebSocketExample ${{ matrix.target == 'hl' && '-lib hashlink -hl bin/example.hl' || '-js bin/example.js' }}
