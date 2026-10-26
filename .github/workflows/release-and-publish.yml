@@ -65,6 +65,10 @@ jobs:
       # haxelib.json lists two contributors, so submit reads which one is
       # submitting before the password: without it the password becomes the user
       - run: |
+          if [ -z "$HAXELIB_PASSWORD" ]; then
+            echo "::error::HAXELIB_PASSWORD isn't set for this repository" >&2
+            exit 1
+          fi
           zip colyseus-websocket.zip $(find src -name '*.hx') haxelib.json LICENSE README.md
           haxe -version
           haxelib submit colyseus-websocket.zip endel "$HAXELIB_PASSWORD"
