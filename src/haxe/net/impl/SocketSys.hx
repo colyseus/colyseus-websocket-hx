@@ -13,6 +13,9 @@ class SocketSys extends Socket2 {
 	private var wasCloseSent:Bool = false;
     private var secure:Bool;
 	private var isClosed:Bool = false;
+	#if target.threaded
+	private var closeLock = new sys.thread.Mutex();
+	#end
 
     private function new(host:String, port:Int, debug:Bool = false) super(host, port, debug);
 
@@ -60,8 +63,9 @@ class SocketSys extends Socket2 {
 	}
 
     override public function close() {
+		// once: a second close throws on neko, and on cpp closes whatever reused the descriptor
+		if (!claimClose()) return;
 		this.impl.close();
-		isClosed = true;
 		if (!wasCloseSent) {
 
 			wasCloseSent = true;
@@ -69,6 +73,15 @@ class SocketSys extends Socket2 {
 			onclose();
 		}
     }
+
+	/** Whether this call gets to close the socket: the socket thread and the owner's close() can race. */
+	private function claimClose():Bool {
+		#if target.threaded closeLock.acquire(); #end
+		var first = !isClosed;
+		isClosed = true;
+		#if target.threaded closeLock.release(); #end
+		return first;
+	}
 
     override public function process() {
         if (sendConnect) {

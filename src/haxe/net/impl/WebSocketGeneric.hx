@@ -18,6 +18,15 @@ class WebSocketGeneric extends WebSocket {
     private var secure = false;
     private var protocols = [];
     private var state:State = State.Handshake;
+    /**
+     * Set once, by setClosed(), and never undone. `state` can't record a close
+     * on its own: the socket thread keeps writing it while it parses, and
+     * close() may run on another thread.
+     */
+    private var closed:Bool = false;
+    #if target.threaded
+    private var closeLock = new sys.thread.Mutex();
+    #end
     public var debug:Bool = true;
     private var needHandleData:Bool = false;
 
@@ -122,7 +131,7 @@ class WebSocketGeneric extends WebSocket {
     private function handleData() {
         needHandleData = false;
 
-        while (true) {
+        while (!closed) {
             if (payload == null) payload = new BytesRW();
 
             switch (state) {
@@ -133,7 +142,7 @@ class WebSocketGeneric extends WebSocket {
 
                     try {
                         validateServerHandshakeHeader();
-                        state = State.Head;
+                        if (!setOpen()) return; // closed while the handshake was read
                         this.onopen();
                     } catch(e:Dynamic) {
                         _debug('Error during validating server handshake response header: $e');
@@ -255,9 +264,22 @@ class WebSocketGeneric extends WebSocket {
         if (statusCode != "101") throw 'Status code differed from 101 indicates that handshake has not succeeded. Actual status code: ${statusCode}.';
     }
 
+    /** The handshake succeeded: opens, unless a close won the race. */
+    private function setOpen():Bool {
+        #if target.threaded closeLock.acquire(); #end
+        var open = !closed;
+        if (open) state = State.Head;
+        #if target.threaded closeLock.release(); #end
+        return open;
+    }
+
     private function setClosed(?code:Int, ?reason:String, wasClean:Bool = false) {
-        if (state != State.Closed) {
-            state = State.Closed;
+        #if target.threaded closeLock.acquire(); #end
+        var first = !closed;
+        closed = true;
+        state = State.Closed;
+        #if target.threaded closeLock.release(); #end
+        if (first) {
             onclose({
                 code: code != null ? code : 1006,  // 1006 = CloseError (abnormal closure)
                 reason: reason != null ? reason : "",
@@ -367,7 +389,7 @@ class WebSocketGeneric extends WebSocket {
     }
 
     override public function close() {
-		if(state != State.Closed) {
+		if(!closed) {
 			sendFrame(Bytes.alloc(0), Opcode.Close);
 			socket.close();
 			setClosed(1000, "Normal closure", true);
@@ -379,6 +401,7 @@ class WebSocketGeneric extends WebSocket {
     }
 
     override function get_readyState():ReadyState {
+        if (closed) return ReadyState.Closed;
         return switch(state) {
             case Handshake: ReadyState.Connecting;
             case ServerHandshake: ReadyState.Connecting;
